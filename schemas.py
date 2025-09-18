@@ -167,6 +167,7 @@ class PolicyBase(BaseModel):
     module: str  # e.g., leave, employee
     action: str  # e.g., view, create, update, delete
     role: str  # role name e.g., manager, employee
+    grade:str
 
     # Access restriction fields
     dept_access: Optional[str] = None  # Department restriction

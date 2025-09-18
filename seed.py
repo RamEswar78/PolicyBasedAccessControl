@@ -163,14 +163,16 @@ def seed():
     db.commit()
 
     # Updated policies compatible with PolicyEvaluator
+    # Updated policies compatible with PolicyEvaluator and including grade fields
     policies = [
-        # Scenario 1: Full-time C2, or contractual_grade exists
+        # Scenario 1: Full-time C2, Contractual NA, Dept NA, Project NA
         Policy(
             module="employee",
             action="view",
             role="employee",
-            dept_access=None,
+            grade="C2",
             contractual_grade=None,
+            dept_access=None,
             project_access=None,
             condition={
                 "type": "or",
@@ -181,29 +183,25 @@ def seed():
             },
             is_active=True,
         ),
-        # Scenario 2: Dept restriction (Life Science)
+        # Scenario 2: Grade C2, Dept Life Science
         Policy(
             module="employee",
             action="view",
             role="employee",
+            grade="C2",
+            contractual_grade=None,
+            dept_access="Life Science",
+            project_access=None,
             condition={
                 "type": "or",
                 "clauses": [
+                    # Full-time employees, no dept restriction
                     {
-                        "type": "and",
-                        "clauses": [
-                            {
-                                "lhs": "resource.grade",
-                                "op": "<=",
-                                "rhs": "principal.grade",
-                            },
-                            {
-                                "lhs": "resource.department",
-                                "op": "in",
-                                "rhs": ["Life Science"],
-                            },
-                        ],
+                        "lhs": "resource.grade",
+                        "op": "<=",
+                        "rhs": "principal.grade",
                     },
+                    # Contractual employees, restricted by dept
                     {
                         "type": "and",
                         "clauses": [
@@ -223,42 +221,54 @@ def seed():
             },
             is_active=True,
         ),
-        # Scenario 3: Dept + Project restriction (Life Science + J&J)
+        # Scenario 3: Grade C2, Dept Life Science, Project J&J
         Policy(
             module="employee",
             action="view",
             role="employee",
-            dept_access="Life Science",
+            grade="C2",
             contractual_grade=None,
+            dept_access="Life Science",
             project_access="J&J",
             condition={
-                "type": "and",
+                "type": "or",
                 "clauses": [
                     {"lhs": "resource.grade", "op": "<=", "rhs": "principal.grade"},
-                    {"lhs": "resource.department", "op": "in", "rhs": ["Life Science"]},
-                    {"lhs": "resource.project", "op": "in", "rhs": ["J&J"]},
+                    {
+                        "type": "and",
+                        "clauses": [
+                            {
+                                "lhs": "resource.department",
+                                "op": "in",
+                                "rhs": ["Life Science"],
+                            },
+                            {"lhs": "resource.project", "op": "in", "rhs": ["J&J"]},
+                        ],
+                    },
                 ],
             },
             is_active=True,
         ),
-        # Scenario 4: Always allow (no restrictions)
+        # Scenario 4: Grade NA, Contractual NA, Dept NA, Project NA → Allow all
         Policy(
             module="employee",
             action="view",
             role="employee",
-            dept_access=None,
+            grade=None,
             contractual_grade=None,
+            dept_access=None,
             project_access=None,
             condition={"type": "always_allow"},
             is_active=True,
         ),
-        # Scenario 5: Full-time + Contractual grade restriction (C2 + CON1)
+        # Scenario 5: Grade C2, Contractual CON1
         Policy(
             module="employee",
             action="view",
             role="employee",
-            dept_access=None,
+            grade="C2",
             contractual_grade="CON1",
+            dept_access=None,
             project_access=None,
             condition={
                 "type": "or",
@@ -273,14 +283,15 @@ def seed():
             },
             is_active=True,
         ),
-        # Scenario 6: Dept OR, Project OR (Life Science/AI + J&J/RBS)
+        # Scenario 6: Grade C2, Dept Life Science or AI, Project J&J or RBS
         Policy(
             module="employee",
             action="view",
             role="employee",
-            dept_access="Life Science,AI",  # multiple departments
+            grade="C2",
             contractual_grade=None,
-            project_access="J&J,RBS",  # multiple projects
+            dept_access="Life Science,AI",
+            project_access="J&J,RBS",
             condition={
                 "type": "and",
                 "clauses": [

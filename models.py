@@ -43,6 +43,7 @@ class Policy(Base):
     module = Column(String)
     action = Column(String)
     role = Column(String)
+    grade = Column(String)
     dept_access = Column(String)
     contractual_grade = Column(String)
     project_access = Column(String)

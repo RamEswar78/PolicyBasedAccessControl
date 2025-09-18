@@ -22,7 +22,9 @@ def get_policies(
         WHERE role = :role
           AND module = :module
           AND action = :action
+          AND grade = :grade
           AND is_active = TRUE
+        
 AND (
     (:contractual_grade IS NULL AND contractual_grade IS NULL)
     OR (:contractual_grade IS NOT NULL AND contractual_grade = :contractual_grade)
@@ -42,6 +44,7 @@ AND (
             "role": role,
             "module": module,
             "action": action,
+            "grade": grade,
             "contractual_grade": contractual_grade,
             "dept_access": dept_access,
             "project_access": project_access,
